@@ -39,18 +39,25 @@ public class MessageService {
     }
 
     // Our API should be able to delete a message identified by a message ID.
-    public void deleteMessage(Integer id) {
-        messageRepository.deleteById(id);
+    public int deleteMessage(Integer Id) {
+        Optional<Message> optionalMessage = messageRepository.findById(Id);
+        if (optionalMessage.isPresent()) {
+            messageRepository.deleteById(Id);
+            return 1; // One row was deleted
+        }
+        return 0; // No rows were deleted (message didn't exist)
     }
 
     // Our API should be able to update a message text identified by a message ID.
-    public void updateMessage(Integer id, Message replacement) {
+    public int updateMessage(Integer id, Message replacement) {
         Optional<Message> optionalMessage = messageRepository.findById(id);
         if (optionalMessage.isPresent()) {
             Message message = optionalMessage.get();
             message.setMessageText(replacement.getMessageText());
             messageRepository.save(message);
+            return 1;
         }
+        return 0;
 
     }
 

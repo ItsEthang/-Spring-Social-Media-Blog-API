@@ -1,5 +1,6 @@
 package com.example.service;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,10 @@ public class AccountService {
         this.accountRepository = accountRepository;
     }
 
+    public List<Account> getAllAccounts() {
+        return accountRepository.findAll();
+    }
+
     // 1: Our API should be able to process new User registrations.
     public Account accountRegister(Account account) {
         return accountRepository.save(account);
@@ -26,6 +31,14 @@ public class AccountService {
     // Todo: make a custom query
     public Account accountLogin(String username, String password) {
         Optional<Account> validAccount = accountRepository.findAccountByUsernameAndPassword(username, password);
+        if (validAccount.isPresent()) {
+            return validAccount.get();
+        }
+        return null;
+    }
+
+    public Account findAccountById(Integer id) {
+        Optional<Account> validAccount = accountRepository.findById(id);
         if (validAccount.isPresent()) {
             return validAccount.get();
         }
