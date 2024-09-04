@@ -2,7 +2,6 @@ package com.example.controller;
 
 import java.util.List;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -51,7 +50,7 @@ public class SocialMediaController {
         return ResponseEntity.status(400).build();
     }
 
-    @GetMapping("login")
+    @PostMapping("login")
     public ResponseEntity<?> accountLogin(@RequestBody Account account) {
         Account validLogin = accountService.accountLogin(account.getUsername(), account.getPassword());
         if (validLogin == null) {
@@ -66,19 +65,11 @@ public class SocialMediaController {
 
         // Check if account exists
         Account existingAccount = accountService.findAccountById(message.getPostedBy());
-        if (existingAccount == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        if (existingAccount == null || messageLength < 1 || messageLength > 255) {
+            return ResponseEntity.status(400).build();
         }
 
-        // Create the message
-        Message createdMessage = messageService.messageCreate(message);
-
-        // Check message validity
-        if (messageLength > 0 && messageLength < 256) {
-            return ResponseEntity.ok(createdMessage);
-        } else {
-            return ResponseEntity.badRequest().build();
-        }
+        return ResponseEntity.ok(messageService.messageCreate(message));
     }
 
     @GetMapping("messages")
@@ -87,8 +78,8 @@ public class SocialMediaController {
     }
 
     @GetMapping("messages/{messageId}")
-    public ResponseEntity<Message> getMessageById(@PathVariable Integer Id) {
-        return ResponseEntity.ok(messageService.getMessageById(Id));
+    public ResponseEntity<Message> getMessageById(@PathVariable Integer messageId) {
+        return ResponseEntity.ok(messageService.getMessageById(messageId));
     }
 
     @DeleteMapping("messages/{messageId}")
@@ -105,11 +96,13 @@ public class SocialMediaController {
     @PatchMapping("messages/{messageId}")
     public ResponseEntity<Integer> updateMessageById(@PathVariable Integer messageId, @RequestBody Message newMessage) {
         Message messageToUpdate = messageService.getMessageById(messageId);
-        if (messageToUpdate != null && messageToUpdate.getMessageText().length() > 0
-                && messageToUpdate.getMessageText().length() < 256) {
-            return ResponseEntity.ok(messageService.updateMessage(messageId, newMessage));
+        String text = newMessage.getMessageText();
+        if (messageToUpdate == null || text.isEmpty()
+                || text.length() > 255) {
+            return ResponseEntity.status(400).build();
         }
-        return ResponseEntity.status(400).build();
+        return ResponseEntity.ok(messageService.updateMessage(messageId, newMessage));
+
     }
 
     @GetMapping("accounts/{accountId}/messages")
