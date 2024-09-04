@@ -33,19 +33,12 @@ public class AccountService {
     // Todo: make a custom query
     public Account accountLogin(String username, String password) {
         Optional<Account> validAccount = accountRepository.findAccountByUsernameAndPassword(username, password);
-        // if (validAccount.isPresent()) {
-        // return validAccount.get();
-        // }
-        // return null;
         return validAccount.orElseThrow(() -> new UnauthorizedException("The username or the password is incorrect"));
     }
 
     public Account findAccountById(Integer id) {
         Optional<Account> validAccount = accountRepository.findById(id);
-        // if (validAccount.isPresent()) {
-        // return validAccount.get();
-        // }
-        // return null;
-        return validAccount.orElseThrow(() -> new ResourceNotFoundException("The account of id" + id + "is not found"));
+        return validAccount
+                .orElseThrow(() -> new ResourceNotFoundException("The account of id " + id + " is not found"));
     }
 }

@@ -68,8 +68,8 @@ public class SocialMediaController {
         int messageLength = message.getMessageText().length();
 
         // Check if account exists
-        Account existingAccount = accountService.findAccountById(message.getPostedBy());
-        if (existingAccount == null || messageLength < 1 || messageLength > 255) {
+        accountService.findAccountById(message.getPostedBy());
+        if (messageLength < 1 || messageLength > 255) {
             return ResponseEntity.status(400).build();
         }
 
@@ -99,13 +99,16 @@ public class SocialMediaController {
 
     @PatchMapping("messages/{messageId}")
     public ResponseEntity<Integer> updateMessageById(@PathVariable Integer messageId, @RequestBody Message newMessage) {
-        Message messageToUpdate = messageService.getMessageById(messageId);
+
         String text = newMessage.getMessageText();
-        if (messageToUpdate == null || text.isEmpty()
-                || text.length() > 255) {
-            return ResponseEntity.status(400).build();
+
+        if (text.isEmpty() || text.length() > 255) {
+            return ResponseEntity.status(400).body(0);
         }
-        return ResponseEntity.ok(messageService.updateMessage(messageId, newMessage));
+
+        messageService.updateMessage(messageId, newMessage);
+
+        return ResponseEntity.ok(1);
 
     }
 

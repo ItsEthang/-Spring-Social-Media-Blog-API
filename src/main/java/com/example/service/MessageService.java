@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.entity.Message;
+import com.example.exception.ResourceNotFoundException;
 import com.example.repository.MessageRepository;
 
 @Service
@@ -31,11 +32,7 @@ public class MessageService {
     // Our API should be able to retrieve a message by its ID.
     public Message getMessageById(Integer id) {
         Optional<Message> optionalMessage = messageRepository.findById(id);
-        if (optionalMessage.isPresent()) {
-            return optionalMessage.get();
-        }
-        return null;
-
+        return optionalMessage.orElse(null);
     }
 
     // Our API should be able to delete a message identified by a message ID.
@@ -49,16 +46,14 @@ public class MessageService {
     }
 
     // Our API should be able to update a message text identified by a message ID.
-    public int updateMessage(Integer id, Message replacement) {
+    public void updateMessage(Integer id, Message replacement) {
         Optional<Message> optionalMessage = messageRepository.findById(id);
-        if (optionalMessage.isPresent()) {
-            Message message = optionalMessage.get();
-            message.setMessageText(replacement.getMessageText());
-            messageRepository.save(message);
-            return 1;
-        }
-        return 0;
 
+        Message message = optionalMessage
+                .orElseThrow(() -> new ResourceNotFoundException("Message of id " + id + " is not found"));
+
+        message.setMessageText(replacement.getMessageText());
+        messageRepository.save(message);
     }
 
     // Our API should be able to retrieve all messages written by a particular user.
